@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Traning log parser</title>
+        <link rel="stylesheet" type="text/css" href="css/index.css">
+
+        <script type="text/javascript" src="js/canvasjs.min.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+
+    </head>
+
+    <body id="dropZone">
+        <div id="rightPanel">
+
+            <p class="panelTitle">Comparison Setting</p>
+
+            <div id="cmpDiv">
+                <div class="radios">
+                    <input type="radio" class="radio" name="comparisonType" value="normal" id="comparisionNormal" onchange="comparisonRadioHandler('normal');" checked>
+                    <label for="comparisionNormal" class="radioLabel">Comparison Normal</label>
+                </div>
+
+                <div class="radios">
+                    <input type="radio" class="radio" name="comparisonType" value="absolute" id="comparisionAbsolute" onchange="comparisonRadioHandler('absolute');">
+                    <label for="comparisionAbsolute" class="radioLabel">Comparison Absolute</label>
+                </div>
+
+                <div class="radios">
+                    <input type="radio" class="radio" name="comparisonType" value="relative" id="comparisionRelative" onchange="comparisonRadioHandler('relative');">
+                    <label for="comparisionRelative" class="radioLabel">Comparison Relative</label>
+                </div>
+
+                <div id="stepDiv">
+                    <label for="stepText">Comparision step: </label><input type="text" id="stepText" value="1">
+                </div>
+
+                <div id="removeZerosDiv">
+                    <input type="checkbox" id="removeZeros" name="removeZeros" checked><label for="removeZeros">Remove Zeros</label>
+                </div>
+
+            </div>
+
+            <p class="panelTitle">Log Parser</p>
+
+            <div id="selectLogs"></div>
+        </div>
+
+        <div id="centerPanel">
+            <div id="uploadDiv" class="backgroundFilter">
+                <img src="img/upload.png" width="20%" style="margin: 7%;" alt="upload"/>
+                <input id="selectFile" style="display: none;" name="file" type="file" accept="image/jpg"/>
+            </div>
+
+            <div id="lossSummary">Min: 0, Max: 0, Averages: 0</div>
+
+            <div id="meanError"></div>
+            <div id="lossChart"></div>
+            <div id="comparisonChart"></div>
+        </div>
+
+        <div id="dropDiv"></div>
+
+        <dialog id="dialogDiv">
+            <p id="dialogTitle"></p>
+            <p id="dialogContext"></p>
+            <p id="dialogDownloadCSV">download CSV</p>
+            <div>
+                <label for="lossTagText">Loss Tag:</label><input type="text" id="lossTagText">
+                <input type="checkbox" id="regex" name="regex"><label for="regex">Regex</label>
+            </div>
+            <div id="dialogButton" class="backgroundFilter" onclick="dialogButtonHandler(this);">OK</div>
+        </dialog>
+    </body>
+
+    <script>
+        document.getElementById('selectFile').addEventListener('change', selectFile, false);
+        document.getElementById('uploadDiv').addEventListener('click', clickUpload, false);
+
+        function clickUpload(){
+            document.getElementById('selectFile').click();
+        }
+
+        let centerPanel = document.getElementById('centerPanel');
+        centerPanel.addEventListener('drop', dropHandler, false);
+        centerPanel.addEventListener('dragover', dragoverHandler, false);
+
+        let dialog = document.getElementById('dialogDiv');
+        dialog.addEventListener('click', (event) => {
+            let rect = dialog.getBoundingClientRect();
+            let isInDialog = (rect.top <= event.clientY && event.clientY <= rect.top + rect.height && rect.left <= event.clientX && event.clientX <= rect.left + rect.width);
+            if(!isInDialog){
+                dialog.close();
+            }
+        })
+
+        document.getElementById('stepText').addEventListener('input', function(){
+            this.value = this.value.replace(/[^0-9]/g, "");
+            logParser.updateStep();
+        });
+
+        document.getElementById('removeZeros').addEventListener('change', function(){
+            logParser.updateStep();
+        })
+
+    </script>
+</html>
