@@ -1,0 +1,268 @@
+* {
+    padding: 0;
+    margin: 0;
+    border: 0 solid aqua;
+}
+
+html{
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    background-size: cover;
+    background: url(../img/background.jpg) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    display: flex;
+    /*flex-direction: column;*/
+    /*justify-content: center;*/
+    text-align: center;
+    align-items: center;
+}
+
+.backgroundFilter{
+    border: 1px solid black;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(25px);
+    border-radius: 20px;
+}
+
+.backgroundFilter:hover{
+    border: 1px solid whitesmoke;
+    background: rgba(0, 0, 0, 0.4);
+
+}
+
+#rightPanel{
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 20%;
+    z-index: 1;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(25px);
+    text-align: center;
+}
+
+.panelTitle{
+    font-size: 150%;
+    padding: 5%;
+    color: whitesmoke;
+    border-bottom: 1px solid gray;
+}
+
+#centerPanel{
+    width: 80%;
+    height: 100%;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#lossChart{
+    display: none;
+    height: 40%;
+    width: 50%;
+    margin-bottom: 20px;
+    border: 1px solid black;
+}
+
+#comparisonChart{
+    display: none;
+    height: 40%;
+    width: 50%;
+    border: 1px solid black;
+}
+
+#uploadDiv{
+    width: 20%;
+    height: auto;
+}
+
+#selectLogs{
+    display: block;
+    align-items: center;
+    justify-content: center;
+}
+
+.checkboxText{
+    color: whitesmoke;
+}
+
+.checkboxDiv{
+    display: flex;
+    width: 90%;
+    padding: 5px;
+    padding-left: 15px;
+    border-bottom: 1px solid gray;
+}
+
+input[type=checkbox]{
+    margin-right: 10px;
+}
+
+#regex{
+    margin-right: 5px;
+}
+
+.marquee {
+    color: whitesmoke;
+    white-space: nowrap;
+    overflow: hidden;
+    display: block;
+}
+
+.marquee > label {
+    height: 1.5em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow:hidden;
+    display: inline-block;
+}
+
+.marquee > label:hover {
+    animation: linear infinite;
+    animation-name: marquee;
+    animation-duration: 3s;
+}
+
+@keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-100%); }
+}
+
+
+#dialogDiv{
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    padding: 20px;
+
+    border: 1px solid black;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 20px;
+
+    color: whitesmoke;
+    overflow: hidden;
+}
+
+#lossTagText{
+    margin: 20px;
+    padding: 5px;
+}
+
+#dialogButton{
+    color: whitesmoke;
+    width: 100%;
+    cursor: pointer;
+}
+
+.radios {
+    display: flex;
+    padding-left: 3%;
+}
+
+.radio {
+    -webkit-appearance: none;
+    margin: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: hsla(0, 0%, 0%, 0.2);
+    background-image: -webkit-radial-gradient(
+            hsla(200, 100%, 90%, 1) 0%,
+            hsla(200, 100%, 70%, 1) 15%,
+            hsla(200, 100%, 60%, 0.3) 28%,
+            hsla(200, 100%, 30%, 0) 70%
+    );
+    background-repeat: no-repeat;
+    outline: none;
+}
+
+.radio,
+.radio:active {
+    background-position: 0 24px;
+}
+
+.radio:checked {
+    background-position: 0 0;
+}
+
+.radioLabel {
+    display: flex;
+    align-items: center;
+    color: whitesmoke;
+}
+
+.radioLabel:hover {
+    color: whitesmoke;
+}
+
+#stepDiv{
+    color: whitesmoke;
+    width: 100%;
+    padding: 10px;
+    display: flex;
+}
+
+
+#stepText{
+    margin-left: 10px;
+}
+
+
+#usp_yan{
+    display: none;
+}
+
+#lossSummary{
+    z-index: 1;
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    color: gray;
+}
+
+#dialogDownloadCSV{
+    color: cornflowerblue;
+    margin-top: 5px;
+}
+
+#dialogDownloadCSV:hover{
+    cursor: pointer;
+}
+
+#removeZerosDiv{
+    display: flex;
+    align-items: center;
+    color: whitesmoke;
+    margin-left: 15px;
+}
+
+.ads{
+    z-index: 1;
+    position: absolute;
+    left: 5px;
+    top: 25px;
+    color: gray;
+}
+
+#meanError{
+    z-index: 1;
+    position: absolute;
+    transform: translate(0, -50%);
+    bottom: 35px;
+    color: gray;
+}
