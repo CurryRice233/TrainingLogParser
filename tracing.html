@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Training log parser</title>
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <link rel="stylesheet" type="text/css" href="css/tracing.css">
+
+<!--    <script type="text/javascript" src="js/canvasjs.min.js"></script>-->
+    <script type='text/javascript' src='js/tracing.js'></script>
+
+</head>
+<body id="dropZone">
+
+<a class="ads" href="https://github.com/CurryRice233/TrainingLogParser">>Welcome to star this project❤</a>
+<a class="ads" style="top:25px;" target="_blank" href="https://curryrice233.github.io/TrainingLogParser/tracing.html">Loss parser</a>
+
+<div id="rightPanel">
+
+    <p class="panelTitle"></p>
+
+    <div id="cmpDiv">
+
+
+    </div>
+
+    <p class="panelTitle">Tracing Data</p>
+
+    <div id="selectLogs">
+
+
+    </div>
+
+
+</div>
+<div id="centerPanel">
+    <div id="uploadDiv" class="backgroundFilter">
+        <img src="img/upload.png" width="20%" style="margin: 7%;" alt="upload"/>
+        <input id="selectFile" style="display: none;" name="file" type="file" accept="image/jpg"/>
+        <p style="color: whitesmoke; margin-bottom: 15px">Drag "trace_view.json"</p>
+    </div>
+
+    <div id="tableDiv" style="display: none">
+            <table>
+                <thead id="tableHead">
+
+                </thead>
+                <tbody id="tableBody">
+
+                </tbody>
+
+            </table>
+    </div>
+
+</div>
+
+<div id="dropDiv">
+
+</div>
+
+</body>
+
+<script>
+    document.getElementById('selectFile').addEventListener('change', selectFile, false);
+    document.getElementById('uploadDiv').addEventListener('click', clickUpload, false);
+
+    function clickUpload() {
+        document.getElementById('selectFile').click()
+    }
+
+    let dropZone = document.getElementById("dropZone");
+    dropZone.addEventListener('drop', dropHandler, false);
+    dropZone.addEventListener('dragover', dragoverHandler, false);
+
+</script>
+</html>

@@ -12,6 +12,7 @@
 <body id="dropZone">
 
 <a class="ads" href="https://github.com/CurryRice233/TrainingLogParser">Welcome to star this project❤</a>
+<a class="ads" style="top:45px;" target="_blank" href="https://curryrice233.github.io/TrainingLogParser/tracing.html">Tracing analysis tool</a>
 
 <div id="rightPanel">
 
@@ -19,20 +20,17 @@
 
     <div id="cmpDiv">
         <div class="radios">
-            <input type="radio" class="radio" name="comparisonType" value="normal" id="comparisonNormal"
-                   onchange="comparisonRadioHandler('normal');" checked>
+            <input type="radio" class="radio" name="comparisonType" value="normal" id="comparisonNormal" onchange="comparisonRadioHandler('normal');" checked>
             <label for="comparisonNormal" class="radioLabel">Comparison Normal</label>
         </div>
 
         <div class="radios">
-            <input type="radio" class="radio" name="comparisonType" value="absolute" id="comparisonAbsolute"
-                   onchange="comparisonRadioHandler('absolute');">
+            <input type="radio" class="radio" name="comparisonType" value="absolute" id="comparisonAbsolute" onchange="comparisonRadioHandler('absolute');">
             <label for="comparisonAbsolute" class="radioLabel">Comparison Absolute</label>
         </div>
 
         <div class="radios">
-            <input type="radio" class="radio" name="comparisonType" value="normal" id="comparisonRelative"
-                   onchange="comparisonRadioHandler('relative');">
+            <input type="radio" class="radio" name="comparisonType" value="normal" id="comparisonRelative" onchange="comparisonRadioHandler('relative');">
             <label for="comparisonRelative" class="radioLabel">Comparison Relative</label>
         </div>
 
@@ -41,8 +39,7 @@
         </div>
 
         <div id="removeZerosDiv">
-            <input type="checkbox" id="removeZeros" name="removeZeros" checked><label for="removeZeros">Remove
-            Zeros</label>
+            <input type="checkbox" id="removeZeros" name="removeZeros" checked><label for="removeZeros">Remove Zeros</label>
         </div>
 
     </div>
@@ -76,9 +73,10 @@
     <p id="dialogTitle"></p>
     <p id="dialogContext"></p>
     <a id="dialogDownloadCSV">download CSV</a>
-    <div>
-        <label for="lossTagText">Loss Tag:</label><input type="text" id="lossTagText">
-        <input type="checkbox" id="regex" name="regex"><label for="regex">Regex</label>
+    <div >
+        <label for="lossTagText">Loss Tag:</label><input type="text" id="lossTagText"><br/>
+        <label for="lossRangeText">Loss Range:</label><input type="text" id="lossRangeText"><br/>
+        <input type="checkbox" id="regex" name="regex"><label for="regex">Regex</label><br/>
     </div>
     <div id="dialogButton" class="backgroundFilter" onclick="dialogButtonHandler(this);">OK</div>
 </dialog>
@@ -107,13 +105,13 @@
         }
     })
 
-    document.getElementById("stepText").addEventListener("input", function () {
+    document.getElementById("stepText").addEventListener("input", function() {
         this.value = this.value.replace(/[^0-9]/g, "");
-        logParser.updateStep();
+        logParser.updateChart();
     });
 
     document.getElementById('removeZeros').addEventListener('change', function () {
-        logParser.updateStep();
+        logParser.updateChart();
     });
 
 

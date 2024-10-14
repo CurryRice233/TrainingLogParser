@@ -42,6 +42,13 @@ function settingClickHandler(fileName) {
         document.getElementById('dialogContext').innerText = '\nFound loss step: ' + logParser.files[fileName].losses.length;
         document.getElementById('lossTagText').value = logParser.files[fileName].lossTag;
 
+        let end = logParser.files[fileName].rangeEnd
+        if (document.getElementById('removeZeros').checked) {
+            end = logParser.files[fileName].rangeEndNoZeros;
+        }
+
+        document.getElementById('lossRangeText').value = logParser.files[fileName].rangeStart + ':' + end;
+
         // remove all event listener
         let old_element = document.getElementById("dialogDownloadCSV");
         let new_element = old_element.cloneNode(true);
@@ -59,13 +66,13 @@ function removeLogClickHandler(fileName) {
 
 function dialogButtonHandler(event) {
     document.getElementById('dialogDiv').close();
-    logParser.updateLossTag(
+    logParser.updateLogSetting(
         document.getElementById('dialogTitle').innerText,
         document.getElementById('lossTagText').value,
+        document.getElementById('lossRangeText').value,
         null,
         document.getElementById('regex').checked
     );
-    logParser.updateComparison();
 }
 
 function comparisonRadioHandler(comparisonType) {
@@ -91,6 +98,18 @@ function setLossSummary(fileName) {
 
 function resetLossSummary() {
     document.getElementById('lossSummary').innerText = 'Step: 0, Min: 0, Max: 0, Averages: 0';
+}
+
+function getMaxMinMean(array){
+    let min = null;
+    let max = null;
+    let sum = 0;
+    for (let i = 0; i < array.length; i++) {
+        if (min == null || min > array[i]) {min = array[i];}
+        if (max == null || max < array[i]) {max = array[i];}
+        sum += array[i];
+    }
+    return [min, max, sum/array.length]
 }
 
 
@@ -132,13 +151,19 @@ class LogParser {
                 file: '',
                 losses: [],
                 lossesNoZeros: [],
-                dataPoints: [],
+                chartData: [],
                 lossTag: '',
                 durationTag: '',
                 visible: false,
                 min: 0,
                 max: 0,
-                average: 0
+                average: 0,
+                minNoZeros: 0,
+                maxNoZeros: 0,
+                averageNoZeros: 0,
+                rangeStart: 0,
+                rangeEnd: -1,
+                rangeEndNoZeros: -1
             }
 
             let div = document.createElement('div');
@@ -168,29 +193,43 @@ class LogParser {
         }
         console.log('Added ' + fileName);
 
-        this.updateLossTag(fileName, this.files[fileName].lossTag, this.defaultDurationTag, false);
+        this.updateLogSetting(fileName, this.files[fileName].lossTag, this.defaultDurationTag, false);
         if (this.files[fileName].length === 0) {
             settingClickHandler(fileName);
         } else {
-            this.updateComparison();
+            this.plotComparison();
         }
     }
 
     removeFile(fileName) {
-        if (fileName in this.files) {
+        if(fileName in this.files) {
             document.getElementById("selectLog_" + fileName).remove();
             delete this.files[fileName]
-            this.updateStep();
+            this.updateChart();
         }
     }
 
-    updateLossTag(fileName, lossTag, durationTag, regex) {
+    updateLogSetting(fileName, lossTag, rangeTag, durationTag, regex) {
         this.defaultLossTag = lossTag;
+        let range = rangeTag.split(":")
+        this.files[fileName].rangeStart = parseInt(range[0]);
+        this.files[fileName].rangeEnd = parseInt(range[1]);
+        this.files[fileName].rangeEndNoZeros = parseInt(range[1]);
+
         let losses = this.parserLog(fileName, lossTag, durationTag, regex);
+
+        if(isNaN(this.files[fileName].rangeStart)){
+            this.files[fileName].rangeStart = 0;
+        }
+        if(isNaN(this.files[fileName].rangeEnd)){
+            this.files[fileName].rangeEnd = losses[0].length;
+            this.files[fileName].rangeEndNoZeros = losses[1].length;
+        }
+
         this.files[fileName].losses = losses[0];
         this.files[fileName].lossesNoZeros = losses[1];
-        this.addLossData(fileName, losses[0]);
-        this.plotLosses();
+        this.updateLogData(fileName);
+        this.updateChart();
     }
 
     parserLog(fileName, lossTag, durationTag, regex) {
@@ -226,28 +265,6 @@ class LogParser {
         return [losses, lossesNoZeros];
     }
 
-    addLossData(fileName, losses) {
-        let dataPoints = [];
-        let min = null;
-        let max = null;
-        let sum = 0;
-        for (let i = 0; i < losses.length; i++) {
-            dataPoints.push({x: i, y: losses[i]});
-            if (min == null || min > losses[i]) {
-                min = losses[i];
-            }
-            if (max == null || max < losses[i]) {
-                max = losses[i];
-            }
-            sum += losses[i];
-        }
-        this.files[fileName].lossData = dataPoints;
-        this.files[fileName].min = min;
-        this.files[fileName].max = max;
-        this.files[fileName].average = sum / losses.length;
-        this.updateLossStep(fileName);
-    }
-
     parserLossByLine(line, lossText) {
         let pos = line.indexOf(lossText);
         let loss = null;
@@ -271,6 +288,17 @@ class LogParser {
         return loss;
     }
 
+    updateLogData(fileName) {
+        let res = getMaxMinMean(this.files[fileName].losses)
+        this.files[fileName].min = res[0];
+        this.files[fileName].max = res[1];
+        this.files[fileName].average = res[2];
+        res = getMaxMinMean(this.files[fileName].lossesNoZeros)
+        this.files[fileName].minNoZeros = res[0];
+        this.files[fileName].maxNoZeros = res[1];
+        this.files[fileName].averageNoZeros = res[2];
+    }
+
     // parserLossByDuration(line, durationText){
     //     let pos = line.indexOf(durationText);
     //     let duration = null;
@@ -288,59 +316,74 @@ class LogParser {
 
     updateLogVisible(fileName, visible) {
         this.files[fileName].visible = visible;
-        this.plotLosses();
-        this.updateComparison();
+        this.updateChart()
     }
 
-    updateStep() {
+    updateChart(){
+        // update comparison step
         let step = parseInt(document.getElementById("stepText").value);
         if (isNaN(step) || step <= 0) {
             step = 1;
             document.getElementById("stepText").value = 1;
         }
         this.comparisonStep = step;
-        this.updateAllLossStep();
-        this.updateComparison();
+
+        // update range
+        this.updateLossesRange();
+        this.updateChartData();
+
+        // plot charts
         this.plotLosses();
+        this.plotComparison();
     }
 
-    updateAllLossStep() {
+    updateLossesRange(){
+        this.lossRangeStart = null;
+        this.lossRangeEnd = null;
+        for (let file in this.files) {
+            let end = this.files[file].rangeEnd;
+            if (document.getElementById('removeZeros').checked) {
+                end = this.files[file].rangeEndNoZeros;
+            }
+
+            if (this.files[file].visible && (this.lossRangeEnd == null || this.lossRangeEnd > end)) {
+                this.lossRangeEnd = end;
+            }
+
+            if (this.files[file].visible && (this.lossRangeStart == null || this.lossRangeStart < this.files[file].rangeStart)) {
+                this.lossRangeStart = this.files[file].rangeStart;
+            }
+        }
+    }
+
+    updateChartData(){
         for (let fileName in this.files) {
-            this.updateLossStep(fileName);
+            if (this.files[fileName].visible) {
+                let loss = this.files[fileName].losses;
+                if (document.getElementById('removeZeros').checked) {
+                    loss = this.files[fileName].lossesNoZeros;
+                }
+                this.files[fileName].chartData = loss.slice(this.lossRangeStart, this.lossRangeEnd);
+            }
         }
-    }
-
-    updateLossStep(fileName) {
-        let dataPoints = [];
-        let losses;
-        if (document.getElementById('removeZeros').checked) {
-            losses = this.files[fileName].lossesNoZeros;
-        } else {
-            losses = this.files[fileName].losses;
-        }
-
-        for (let i = 0; i < losses.length; i = i + this.comparisonStep) {
-            let subArray = losses.slice(i, i + this.comparisonStep);
-            dataPoints.push({x: i, y: subArray.reduce((a, b) => a + b, 0) / subArray.length});
-        }
-        this.files[fileName].chartData = dataPoints;
     }
 
     plotLosses() {
         let data = [];
-        let maxLen = null;
-        for (let fileName in this.files) {
-            if (this.files[fileName].visible && (maxLen == null || maxLen > this.files[fileName].chartData.length)) {
-                maxLen = this.files[fileName].chartData.length;
-            }
-        }
+
         for (let fileName in this.files) {
             if (this.files[fileName].visible) {
+                let dataPoints = [];
+                for (let i = 0; i < this.files[fileName].chartData.length; i = i + this.comparisonStep) {
+                    let subArray = this.files[fileName].chartData.slice(i, i + this.comparisonStep);
+                    dataPoints.push({x: i + this.lossRangeStart, y: subArray.reduce((a, b) => a + b, 0) / subArray.length});
+                }
+
                 data.push({
                     name: fileName,
                     type: 'line',
                     showInLegend: true,
-                    dataPoints: this.files[fileName].chartData.slice(0, maxLen)
+                    dataPoints: dataPoints
                 });
             }
         }
@@ -354,7 +397,7 @@ class LogParser {
             axisY: {
                 lineThickness: 1
             },
-            data: data  // random data
+            data: data
         };
 
         document.getElementById("uploadDiv").style.display = 'none';
@@ -370,7 +413,7 @@ class LogParser {
 
     }
 
-    updateComparison() {
+    plotComparison() {
         let filtered = [];
         for (let key in this.files) {
             if (this.files[key].visible) {
@@ -386,16 +429,8 @@ class LogParser {
     }
 
     updateComparisonData(fileName1, fileName2) {
-        let loss1;
-        let loss2;
-
-        if (document.getElementById('removeZeros').checked) {
-            loss1 = this.files[fileName1].lossesNoZeros;
-            loss2 = this.files[fileName2].lossesNoZeros;
-        } else {
-            loss1 = this.files[fileName1].losses;
-            loss2 = this.files[fileName2].losses;
-        }
+        let loss1 = this.files[fileName1].chartData;
+        let loss2 = this.files[fileName2].chartData;
 
 
         this.comparison.normal = [];
@@ -417,10 +452,10 @@ class LogParser {
                 tmp2 = loss2.slice(i, totalLength).reduce((sum, n) => sum + n, 0) / (totalLength - i);
             }
 
-            this.comparison.normal.push({x: x * this.comparisonStep, y: tmp1 - tmp2});
-            this.comparison.absolute.push({x: x * this.comparisonStep, y: Math.abs(tmp1 - tmp2)});
-            this.comparison.relative.push({x: x * this.comparisonStep, y: Math.abs(tmp1 - tmp2) / tmp1});
-            this.comparison.relative_baseline.push({x: x * this.comparisonStep, y: this.relative_error})
+            this.comparison.normal.push({x: x * this.comparisonStep + this.lossRangeStart, y: tmp1 - tmp2});
+            this.comparison.absolute.push({x: x * this.comparisonStep + this.lossRangeStart, y: Math.abs(tmp1 - tmp2)});
+            this.comparison.relative.push({x: x * this.comparisonStep + this.lossRangeStart, y: Math.abs(tmp1 - tmp2) / tmp1});
+            this.comparison.relative_baseline.push({x: x * this.comparisonStep + this.lossRangeStart, y: this.relative_error})
 
             i += this.comparisonStep;
             x++;
@@ -468,8 +503,8 @@ class LogParser {
             })
         }
 
-        let me = 0.0;
-        let mse = 0.0;
+        let me;
+        let mse;
 
         if (comparisonType === 'normal') {
             me = this.comparison.normal_mean_error;
@@ -519,16 +554,3 @@ class LogParser {
 
 logParser = new LogParser();
 
-
-const clearAdvertisingInterval = setInterval(clearAdvertising, 1000);
-var removeCount = 0;
-
-function clearAdvertising() {
-    if (document.getElementById("usp_yan") != null) {
-        document.getElementById("usp_yan").style.display = 'none';
-        if (removeCount === 5) {
-            clearInterval(clearAdvertisingInterval);
-        }
-        removeCount += 1;
-    }
-}
