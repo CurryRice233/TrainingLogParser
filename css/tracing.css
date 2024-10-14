@@ -1,0 +1,108 @@
+.ads{
+    top: 3px;
+}
+
+#rightPanel{
+    right: -19.5%;
+}
+
+#rightPanel:hover{
+    right: 0;
+}
+
+#centerPanel{
+    height: 100%;
+    width: 100%;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#tableDiv {
+    max-width: 98%;
+    margin-top: 5%;
+    margin-bottom: 20px;
+    height: 90%;
+    display: block;
+    justify-content: center;
+    text-align: center;
+    overflow: auto;
+}
+
+#tableDiv::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+    border-radius: 4px;
+    background-color: #383838;
+}
+
+#tableDiv::-webkit-scrollbar-thumb {
+    background-color: #8f8f8f;
+    border-radius: 4px;
+}
+
+table {
+    border-collapse: collapse;
+    max-width: 100%;
+    text-align: center;
+    border: 1px solid silver;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(25px);
+    color: silver;
+    white-space: nowrap;
+    font-size: 14px;
+    padding: 20px 30px 20px 10px;
+}
+
+th,
+td {
+    border: 1px solid silver;
+    padding: 7px;
+}
+
+
+th {
+    color: whitesmoke;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+td{
+    color: white;
+}
+
+tbody > tr > td:nth-of-type(1) {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.performanceWarningLevel0{
+    background: rgba(255, 0, 0, 0.05);
+}
+
+.performanceWarningLevel1{
+    background: rgba(255, 0, 0, 0.15);
+}
+
+.marquee {
+    color: whitesmoke;
+    white-space: nowrap;
+    overflow: hidden;
+    display: block;
+    text-align: left;
+    max-width: 350px;
+}
+
+.marquee > p {
+    height: 1.5em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow:hidden;
+    display: inline-block;
+}
+
+.marquee > p:hover {
+    animation: linear infinite;
+    animation-name: marquee;
+    animation-duration: 3s;
+}
