@@ -79,7 +79,7 @@ function getOpTypeAndNameGPU(item) {
     let operatorNameLowercase = operatorName.toLowerCase()
     if (['gpu_memcpy', 'gpu_memset'].includes(item['cat'])) {
         return [OpType.MEM, operatorName.split(' ')[0]]
-    } else if (operatorNameLowercase.startsWith('ncclkernel')) {
+    } else if (operatorNameLowercase.startsWith('ncclkernel') || operatorNameLowercase.startsWith('nccldevkernel')) {
         return [OpType.COMM, operatorName.split('_')[1]]
     } else if (operatorNameLowercase.includes('gemm')) {
         return [OpType.CUBE, operatorName.split('_')[2]]
@@ -704,8 +704,9 @@ class TracingParser {
         let fileName = document.createElement('td');
         let fileNameLink = document.createElement('a');
         fileNameLink.textContent = tracingData.fileName;
+        fileNameLink.innerHTML = '<div class="marquee" style="max-width: 100px"><p>' + fileNameLink.innerHTML + '</p>';
         if (tracingData.fileName === baselineFileName) {
-            fileNameLink.innerHTML += '<br>(baseline)'
+            fileNameLink.innerHTML += '(baseline)'
             // fileName.style.color = 'rgba(0, 0, 255)';
             // fileNameLink.style.textDecoration = 'underline';
         }
