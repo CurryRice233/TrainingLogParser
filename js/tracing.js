@@ -191,9 +191,9 @@ function timeSummary(tracingData) {
                 break;
             case OpType.COMM:
                 let tid = item['tid']
-                if(commGroupOps.has(tid)){
+                if (commGroupOps.has(tid)) {
                     commGroupOps.get(tid).push(item);
-                }else{
+                } else {
                     commGroupOps.set(tid, [item]);
                 }
                 commGroupTime.set(tid, getWithDefault(commGroupTime, tid, 0) + duration);
@@ -315,9 +315,9 @@ function timeSummaryGPU(tracingData) {
             case OpType.COMM:
                 let tid = item['tid']
                 commTime += duration;
-                if(commGroupOps.has(tid)){
+                if (commGroupOps.has(tid)) {
                     commGroupOps.get(tid).push(item);
-                }else{
+                } else {
                     commGroupOps.set(tid, [item]);
                 }
                 commGroupTime.set(tid, getWithDefault(commGroupTime, tid, 0) + duration);
@@ -687,7 +687,7 @@ class TracingParser {
         headersName2.forEach((name) => {
             let thElement = document.createElement('th');
             thElement.innerHTML = name;
-            if(name.startsWith('Group')){
+            if (name.startsWith('Group')) {
                 thElement.addEventListener('click', function (e) {
                     tracingParser.downloadCommGroupJSON(name);
                 });
@@ -710,7 +710,7 @@ class TracingParser {
             // fileName.style.color = 'rgba(0, 0, 255)';
             // fileNameLink.style.textDecoration = 'underline';
         }
-        if(!tracingData.isNPU){
+        if (!tracingData.isNPU) {
             fileNameLink.addEventListener('click', function (e) {
                 tracingParser.downloadJSON(tracingData.fileName);
             })
@@ -838,15 +838,15 @@ class TracingParser {
         a.click();
     }
 
-    downloadCommGroupJSON(groupName){
-        let commOp=[];
+    downloadCommGroupJSON(groupName) {
+        let commOp = [];
         let groupID = parseInt(groupName.split(' ')[1]);
         for (let key in this.files) {
             if (this.files[key].visible && this.files[key].commGroupName.length > groupID) {
                 commOp.push.apply(commOp, this.files[key].commGroupOps.get(this.files[key].commGroupName[groupID][0]));
             }
         }
-        if(commOp.length > 0){
+        if (commOp.length > 0) {
             let a = document.createElement("a");
             let file = new Blob([JSON.stringify(commOp)], {type: 'text/plain'});
             a.href = URL.createObjectURL(file);

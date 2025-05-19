@@ -11,12 +11,12 @@
 </head>
 <body id="dropZone">
 
-<a class="ads" href="https://github.com/CurryRice233/TrainingLogParser">Welcome to star this project❤</a>
-<a class="ads" style="top:45px;" target="_blank" href="https://curryrice233.github.io/TrainingLogParser/tracing.html">Tracing analysis tool</a>
+<a class="ads" href="https://github.com/CurryRice233/TrainingLogParser">💖Welcome to star this project</a>
+<a class="ads" style="top:45px;" target="_blank" href="https://curryrice233.github.io/TrainingLogParser/tracing.html">🔍Tracing analysis tool</a>
 
 <div id="rightPanel">
 
-    <p class="panelTitle">Comparison Setting</p>
+    <p class="panelTitle">🔨Comparison Setting</p>
 
     <div id="cmpDiv">
         <div class="radios">
@@ -38,13 +38,17 @@
             <label for="stepText">Comparison step: </label><input type="text" id="stepText" value="1">
         </div>
 
+        <div id="globalLossTagDiv">
+            <label for="globalLossTagText">Global loss tag: </label><input type="text" id="globalLossTagText" value="loss:">
+        </div>
+
         <div id="removeZerosDiv">
-            <input type="checkbox" id="removeZeros" name="removeZeros" checked><label for="removeZeros">Remove Zeros</label>
+            <input type="checkbox" id="removeZeros" name="removeZeros"><label for="removeZeros">Remove zeros/negative</label>
         </div>
 
     </div>
 
-    <p class="panelTitle">Log Parser</p>
+    <p class="panelTitle">📜Log Parser</p>
 
     <div id="selectLogs">
 
@@ -108,6 +112,10 @@
     document.getElementById("stepText").addEventListener("input", function() {
         this.value = this.value.replace(/[^0-9]/g, "");
         logParser.updateChart();
+    });
+
+    document.getElementById("globalLossTagText").addEventListener("input", function() {
+        logParser.setGlobalLossTag(this.value);
     });
 
     document.getElementById('removeZeros').addEventListener('change', function () {

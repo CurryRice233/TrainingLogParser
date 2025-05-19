@@ -91,7 +91,12 @@ function readFile(file) {
 }
 
 function setLossSummary(fileName) {
-    document.getElementById('lossSummary').innerText = 'Step: ' + logParser.files[fileName].losses.length +
+    let start = logParser.files[fileName].rangeStart
+    let end = logParser.files[fileName].rangeEnd;
+    if (document.getElementById('removeZeros').checked) {
+        end = logParser.files[fileName].rangeEndNoZeros;
+    }
+    document.getElementById('lossSummary').innerText = 'Count: ' + (end - start) +
         ', Min: ' + logParser.files[fileName].min + ', Max: ' + logParser.files[fileName].max +
         ', Average: ' + logParser.files[fileName].average;
 }
@@ -117,6 +122,7 @@ class LogParser {
     constructor() {
         this.files = {};
         this.defaultLossTag = 'loss:';
+        this.chartTitle = 'Loss Chart';
         this.defaultDurationTag = 'elapsed time per iteration (ms): ';
         this.comparison = {
             normal: [],
@@ -171,8 +177,8 @@ class LogParser {
             <div class="checkboxDiv" id="selectLog_` + fileName + `">
                 <input type="checkbox" id="` + fileName + `" name="` + fileName + `" value="` + fileName + `" onclick='checkboxClickHandler(this);' checked>
                 <div class="marquee"><label class="checkboxText" for="` + fileName + `">` + fileName + `</label></div>
-                <img src="img/setting.png" width="20px" height="20px" style="padding-left: 10px"  alt="setting" onclick='settingClickHandler("` + fileName + `");'/>
-                <img src="img/delete.png" width="20px" height="20px" style="padding-left: 10px"  alt="setting" onclick='removeLogClickHandler("` + fileName + `");'/>
+                <img src="img/setting.png" width="20px" height="20px" style="margin-left: 10px"  alt="setting" onclick='settingClickHandler("` + fileName + `");'/>
+                <img src="img/delete.png" width="20px" height="20px" style="margin-left: 10px"  alt="setting" onclick='removeLogClickHandler("` + fileName + `");'/>
             </div>
             `
             document.getElementById("selectLogs").appendChild(div);
@@ -209,6 +215,30 @@ class LogParser {
         }
     }
 
+    setGlobalLossTag(lossTag){
+        let chartTitle = lossTag.trim().replace(/[^a-zA-Z0-9()\s]/g, ' ');
+        this.chartTitle = chartTitle.charAt(0).toUpperCase() + chartTitle.slice(1) + ' Chart';
+        for (let key in this.files) {
+            let rangeTag = this.files[key].rangeStart + ':' + this.files[key].rangeEnd;
+            this.updateLogSetting(key, lossTag, rangeTag, this.files[key].durationTag, false);
+        }
+    }
+
+    checkAndSetGlobalLossTag(){
+        let lossTag = null;
+        for (let key in this.files) {
+            if(lossTag == null || this.files[key].lossTag === lossTag){
+                lossTag = this.files[key].lossTag
+            }else{
+                return
+            }
+        }
+        if(lossTag != null){
+            let chartTitle = lossTag.replace(/[^a-zA-Z0-9()\s]/g, ' ').trim();
+            this.chartTitle = chartTitle.charAt(0).toUpperCase() + chartTitle.slice(1) + ' Chart';
+        }
+    }
+
     updateLogSetting(fileName, lossTag, rangeTag, durationTag, regex) {
         this.defaultLossTag = lossTag;
         let range = rangeTag.split(":")
@@ -221,7 +251,7 @@ class LogParser {
         if(isNaN(this.files[fileName].rangeStart)){
             this.files[fileName].rangeStart = 0;
         }
-        if(isNaN(this.files[fileName].rangeEnd)){
+        if(isNaN(this.files[fileName].rangeEnd) || this.files[fileName].rangeEnd < 0){
             this.files[fileName].rangeEnd = losses[0].length;
             this.files[fileName].rangeEndNoZeros = losses[1].length;
         }
@@ -233,7 +263,7 @@ class LogParser {
     }
 
     parserLog(fileName, lossTag, durationTag, regex) {
-        let file = this.files[fileName].file.split('\n');
+        let file = this.files[fileName].file.split(/\n|\r\n/);
         this.files[fileName].lossTag = lossTag;
         this.cookies[fileName] = lossTag;
         this.saveLossTagToCookie();
@@ -289,11 +319,14 @@ class LogParser {
     }
 
     updateLogData(fileName) {
-        let res = getMaxMinMean(this.files[fileName].losses)
+        let start = this.files[fileName].rangeStart
+        let end = this.files[fileName].rangeEnd
+        let res = getMaxMinMean(this.files[fileName].losses.slice(start, end))
         this.files[fileName].min = res[0];
         this.files[fileName].max = res[1];
         this.files[fileName].average = res[2];
-        res = getMaxMinMean(this.files[fileName].lossesNoZeros)
+        end = this.files[fileName].rangeEndNoZeros
+        res = getMaxMinMean(this.files[fileName].lossesNoZeros.slice(start, end))
         this.files[fileName].minNoZeros = res[0];
         this.files[fileName].maxNoZeros = res[1];
         this.files[fileName].averageNoZeros = res[2];
@@ -320,6 +353,7 @@ class LogParser {
     }
 
     updateChart(){
+        this.checkAndSetGlobalLossTag();
         // update comparison step
         let step = parseInt(document.getElementById("stepText").value);
         if (isNaN(step) || step <= 0) {
@@ -392,7 +426,7 @@ class LogParser {
             zoomEnabled: true,
             animationEnabled: true,
             title: {
-                text: "Loss Chart"
+                text: this.chartTitle
             },
             axisY: {
                 lineThickness: 1
@@ -481,7 +515,7 @@ class LogParser {
             zoomEnabled: true,
             animationEnabled: true,
             title: {
-                text: "Comparison Chart"
+                text: "Comparison " + comparisonType + " Chart"
             },
             axisY: {
                 lineThickness: 1
