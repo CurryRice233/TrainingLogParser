@@ -41,6 +41,12 @@ If you have any suggestions or questions, please open an Issue.
 
 ## 6. Update Log
 
+v2.0
+- Added the option for ordinary relative error comparison.
+- Added multi-keyword parsing functionality.
+- Refactored the code to abstract the data parsing layer and the chart operation layer.
+- Added automatic recognition of Megatron/Verl/Trl framework logs in the absence of a default tag.
+
 v1.0.8
 - Added the log deletion function.
 

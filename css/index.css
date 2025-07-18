@@ -1,7 +1,7 @@
 * {
     padding: 0;
     margin: 0;
-    border: 0 solid aqua;
+    border: 0px solid aqua;
 }
 
 html{
@@ -67,14 +67,6 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-}
-
-#lossChart{
-    display: none;
-    height: 40%;
-    width: 50%;
-    margin-bottom: 20px;
-    border: 1px solid black;
 }
 
 #comparisonChart{
@@ -159,7 +151,7 @@ input[type=checkbox]{
     overflow: hidden;
 }
 
-#lossTagText{
+#parserKeyText{
     margin: 20px;
     padding: 5px;
 }
@@ -223,22 +215,32 @@ input[type=checkbox]{
     display: flex;
 }
 
+#globalParseKeyDiv{
+    color: whitesmoke;
+    width: 100%;
+    padding: 10px;
+    display: flex;
+}
 
 #stepText{
     margin-left: 10px;
 }
 
+#globalParseKeyText{
+    margin-left: 10px;
+    padding-left: 5px;
+}
 
 #usp_yan{
     display: none;
 }
 
-#lossSummary{
+#dataMaxMinMean{
     z-index: 1;
     position: absolute;
-    left: 5px;
-    top: 5px;
+    top: 2px;
     color: gray;
+    font-size: 15px;
 }
 
 #dialogDownloadCSV{
@@ -250,25 +252,63 @@ input[type=checkbox]{
     cursor: pointer;
 }
 
-#removeZerosDiv{
+.globalConfigDiv{
     display: flex;
     align-items: center;
     color: whitesmoke;
     margin-left: 15px;
+    margin-top: 5px;
 }
 
 .ads{
     z-index: 1;
     position: absolute;
     left: 5px;
-    top: 25px;
+    top: 5px;
     color: gray;
 }
 
-#meanError{
-    z-index: 1;
-    position: absolute;
-    transform: translate(0, -50%);
-    bottom: 35px;
+#lossCharts{
+    display: none;
+    height: 90%;
+    max-width: 98%;
+    margin-top: 60px;
+    align-items: center;
+    overflow-y: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#lossCharts::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+    border-radius: 4px;
+    background-color: #383838;
+}
+
+#lossCharts::-webkit-scrollbar-thumb {
+    background-color: #8f8f8f;
+    border-radius: 4px;
+}
+
+.parseKeyDiv{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-sizing: border-box;
+    padding-bottom: 35px;
+}
+
+.parseKeyChartDiv{
+    display: block;
+    min-height: 350px;
+    min-width: 650px;
+    margin: 10px;
+    border: 1px solid black;
+}
+
+.meanError{
+    text-wrap: nowrap;
     color: gray;
 }

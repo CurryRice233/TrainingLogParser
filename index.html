@@ -6,13 +6,15 @@
     <link rel="stylesheet" type="text/css" href="css/index.css">
 
     <script type="text/javascript" src="js/canvasjs.min.js"></script>
+    <script type="text/javascript" src="js/log-parser/parser-data.js"></script>
+    <script type="text/javascript" src="js/log-parser/chart-helper.js"></script>
     <script type='text/javascript' src='js/index.js'></script>
 
 </head>
 <body id="dropZone">
 
 <a class="ads" href="https://github.com/CurryRice233/TrainingLogParser">💖Welcome to star this project</a>
-<a class="ads" style="top:45px;" target="_blank" href="https://curryrice233.github.io/TrainingLogParser/tracing.html">🔍Tracing analysis tool</a>
+<a class="ads" style="top:25px;" target="_blank" href="https://curryrice233.github.io/TrainingLogParser/tracing.html">🔍Tracing analysis tool</a>
 
 <div id="rightPanel">
 
@@ -21,29 +23,45 @@
     <div id="cmpDiv">
         <div class="radios">
             <input type="radio" class="radio" name="comparisonType" value="normal" id="comparisonNormal" onchange="comparisonRadioHandler('normal');" checked>
-            <label for="comparisonNormal" class="radioLabel">Comparison Normal</label>
+            <label for="comparisonNormal" class="radioLabel">Comparison normal</label>
         </div>
 
         <div class="radios">
             <input type="radio" class="radio" name="comparisonType" value="absolute" id="comparisonAbsolute" onchange="comparisonRadioHandler('absolute');">
-            <label for="comparisonAbsolute" class="radioLabel">Comparison Absolute</label>
+            <label for="comparisonAbsolute" class="radioLabel">Comparison absolute</label>
         </div>
 
         <div class="radios">
-            <input type="radio" class="radio" name="comparisonType" value="normal" id="comparisonRelative" onchange="comparisonRadioHandler('relative');">
-            <label for="comparisonRelative" class="radioLabel">Comparison Relative</label>
+            <input type="radio" class="radio" name="comparisonType" value="relative_normal" id="comparisonRelativeNormal" onchange="comparisonRadioHandler('relative_normal');">
+            <label for="comparisonRelativeNormal" class="radioLabel">Comparison relative normal</label>
+        </div>
+
+        <div class="radios">
+            <input type="radio" class="radio" name="comparisonType" value="relative_absolute" id="comparisonRelativeAbs" onchange="comparisonRadioHandler('relative_abs');">
+            <label for="comparisonRelativeAbs" class="radioLabel">Comparison relative absolute</label>
         </div>
 
         <div id="stepDiv">
             <label for="stepText">Comparison step: </label><input type="text" id="stepText" value="1">
         </div>
 
-        <div id="globalLossTagDiv">
-            <label for="globalLossTagText">Global loss tag: </label><input type="text" id="globalLossTagText" value="loss:">
+        <div id="globalParseKeyDiv">
+            <label for="globalParseKeyText">Global parse key: </label><input type="text" id="globalParseKeyText" list="globalParseKey" ondblclick="value='';">
+
+            <datalist id="globalParseKey">
+                <option name="Default" value='["loss:","norm:"]'>Default</option>
+                <option name="Megatron" value='["loss:","grad norm:"]'>Megatron</option>
+                <option name="Verl" value='["critic/rewards/mean:","actor/grad_norm:", "actor/kl_loss", "response_length/mean:"]'>Verl</option>
+                <option name="Trl" value='["&#x27;reward&#x27;:","&#x27;loss&#x27;:","&#x27;completions/mean_length&#x27;:","[&#x27;kl&#x27;:]"]'>Trl</option>
+            </datalist>
         </div>
 
-        <div id="removeZerosDiv">
+        <div class="globalConfigDiv">
             <input type="checkbox" id="removeZeros" name="removeZeros"><label for="removeZeros">Remove zeros/negative</label>
+        </div>
+        
+        <div class="globalConfigDiv">
+            <input type="checkbox" id="disableComparison" name="disableComparison"><label for="disableComparison">Disable comparison chart</label>
         </div>
 
     </div>
@@ -62,10 +80,9 @@
         <img src="img/upload.png" width="20%" style="margin: 7%;" alt="upload"/>
         <input id="selectFile" style="display: none;" name="file" type="file" accept="image/jpg"/>
     </div>
-    <div id="lossSummary">Min: 0, Max: 0, Averages: 0</div>
-    <!--<canvas id="lossChart" width="800" height="450"></canvas>-->
+    <div id="dataMaxMinMean"></div>
     <div id="meanError"></div>
-    <div id="lossChart"></div>
+    <div id="lossCharts"></div>
     <div id="comparisonChart"></div>
 </div>
 
@@ -78,8 +95,8 @@
     <p id="dialogContext"></p>
     <a id="dialogDownloadCSV">download CSV</a>
     <div >
-        <label for="lossTagText">Loss Tag:</label><input type="text" id="lossTagText"><br/>
-        <label for="lossRangeText">Loss Range:</label><input type="text" id="lossRangeText"><br/>
+        <label for="parserKeyText">Parse key:</label><input type="text" id="parserKeyText"><br/>
+        <label for="lossRangeText">Data Range:</label><input type="text" id="lossRangeText"><br/>
         <input type="checkbox" id="regex" name="regex"><label for="regex">Regex</label><br/>
     </div>
     <div id="dialogButton" class="backgroundFilter" onclick="dialogButtonHandler(this);">OK</div>
@@ -114,11 +131,15 @@
         logParser.updateChart();
     });
 
-    document.getElementById("globalLossTagText").addEventListener("input", function() {
+    document.getElementById("globalParseKeyText").addEventListener("input", function() {
         logParser.setGlobalLossTag(this.value);
     });
 
     document.getElementById('removeZeros').addEventListener('change', function () {
+        logParser.updateChart();
+    });
+
+    document.getElementById('disableComparison').addEventListener('change', function () {
         logParser.updateChart();
     });
 
