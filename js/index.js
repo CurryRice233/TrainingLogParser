@@ -87,6 +87,7 @@ class LogParser {
         this.cookies = {};
         this.defaultParseKeys = 'loss:';
         this.comparisonType = 'normal';
+        this.reverseComparison = false;
         this.relative_baseline = 0.02;
 
         let cookies = document.cookie.split(';');
@@ -155,6 +156,9 @@ class LogParser {
         }
         if(comparisonFiles.length === 2 && !isDisableComparison()){
             comparisonFiles.sort();
+            if (this.reverseComparison){
+                comparisonFiles = comparisonFiles.reverse()
+            }
             let comparisonStep = getComparisonStep();
             let noZero = isNoZero();
 
@@ -171,6 +175,11 @@ class LogParser {
     }
 
     updateComparisonType(comparisonType){
+        if (this.comparisonType !== comparisonType){
+            this.reverseComparison = false;
+        }else{
+            this.reverseComparison = !this.reverseComparison
+        }
         this.comparisonType = comparisonType;
         this.updateChart();
     }
