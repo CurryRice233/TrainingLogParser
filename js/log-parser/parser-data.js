@@ -1,13 +1,22 @@
 const numberRegExp = new RegExp('[+-]?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?');
 
-function getMeanError(erros){
+function getMaxMinMeanError(erros){
+    let min = null;
+    let max = null;
     let me = 0.0;
     let mse = 0.0;
     for(let i = 0; i < erros.length; i++){
-        me += erros[i].y;
-        mse += erros[i].y * erros[i].y;
+        let y = erros[i].y;
+        if (min == null || min > y) {
+            min = y;
+        }
+        if (max == null || max < y) {
+            max = y;
+        }
+        me += y;
+        mse += y * y;
     }
-    return [me / erros.length, mse / erros.length]
+    return [min, max, me / erros.length, mse / erros.length]
 }
 
 function getMaxMinMean(array){
@@ -234,14 +243,22 @@ class ComparisonData {
         this.relative_normal_baseline_negative = []
         this.relative_abs = []
         this.relative_abs_baseline = []
-        this.normal_mean_square_error = 0
+        this.normal_min_error = 0
+        this.normal_max_error = 0
         this.normal_mean_error = 0
-        this.absolute_mean_square_error = 0
+        this.normal_mean_square_error = 0
+        this.absolute_min_error = 0
+        this.absolute_max_error = 0
         this.absolute_mean_error = 0
-        this.relative_normal_mean_square_error = 0
+        this.absolute_mean_square_error = 0
+        this.relative_normal_min_error = 0
+        this.relative_normal_max_error = 0
         this.relative_normal_mean_error = 0
-        this.relative_abs_mean_square_error = 0
+        this.relative_normal_mean_square_error = 0
+        this.relative_abs_min_error = 0
+        this.relative_abs_max_error = 0
         this.relative_abs_mean_error = 0
+        this.relative_abs_mean_square_error = 0
         if(!this.isNoZero){
             this.data1 = this.file1.rangeData
             this.data2 = this.file2.rangeData
@@ -288,21 +305,29 @@ class ComparisonData {
             x++;
         }
 
-        let errors = getMeanError(this.normal)
-        this.normal_mean_error = errors[0];
-        this.normal_mean_square_error = errors[1];
+        let errors = getMaxMinMeanError(this.normal)
+        this.normal_min_error = errors[0];
+        this.normal_max_error = errors[1];
+        this.normal_mean_error = errors[2];
+        this.normal_mean_square_error = errors[3];
 
-        errors = getMeanError(this.absolute)
-        this.absolute_mean_error = errors[0];
-        this.absolute_mean_square_error = errors[1];
+        errors = getMaxMinMeanError(this.absolute)
+        this.absolute_min_error = errors[0];
+        this.absolute_max_error = errors[1];
+        this.absolute_mean_error = errors[2];
+        this.absolute_mean_square_error = errors[3];
 
-        errors = getMeanError(this.relative_normal)
-        this.relative_normal_mean_error = errors[0];
-        this.relative_normal_mean_square_error = errors[1];
+        errors = getMaxMinMeanError(this.relative_normal)
+        this.relative_normal_min_error = errors[0];
+        this.relative_normal_max_error = errors[1];
+        this.relative_normal_mean_error = errors[2];
+        this.relative_normal_mean_square_error = errors[3];
 
-        errors = getMeanError(this.relative_abs)
-        this.relative_abs_mean_error = errors[0];
-        this.relative_abs_mean_square_error = errors[1];
+        errors = getMaxMinMeanError(this.relative_abs)
+        this.relative_abs_min_error = errors[0];
+        this.relative_abs_max_error = errors[1];
+        this.relative_abs_mean_error = errors[2];
+        this.relative_abs_mean_square_error = errors[3];
     }
 
     getDataByComparisonType(comparisonType){
@@ -321,13 +346,13 @@ class ComparisonData {
 
     getMeanErrorByComparisonType(comparisonType){
         if(comparisonType === 'normal'){
-            return [this.normal_mean_error, this.normal_mean_square_error];
+            return [this.normal_min_error, this.normal_max_error, this.normal_mean_error, this.normal_mean_square_error];
         }else if(comparisonType === 'absolute'){
-            return [this.absolute_mean_error, this.absolute_mean_square_error];
+            return [this.absolute_min_error, this.absolute_max_error, this.absolute_mean_error, this.absolute_mean_square_error];
         }else if(comparisonType === 'relative_normal'){
-            return [this.relative_normal_mean_error, this.relative_normal_mean_square_error];
+            return [this.relative_normal_min_error, this.relative_normal_max_error, this.relative_normal_mean_error, this.relative_normal_mean_square_error];
         }else if(comparisonType === 'relative_abs'){
-            return [this.relative_abs_mean_error, this.relative_abs_mean_square_error];
+            return [this.relative_abs_min_error, this.relative_abs_max_error, this.relative_abs_mean_error, this.relative_abs_mean_square_error];
         }else{
             console.log('Unknown comparison type.')
         }
@@ -335,6 +360,6 @@ class ComparisonData {
 
     getMeanErrorInfo(comparisonType){
         let errors = this.getMeanErrorByComparisonType(comparisonType)
-        return `Mean Error:${errors[0]}, Mean Square Error:${errors[1]}`
+        return `Mean Error:${errors[2]}, Mean Square Error:${errors[3]}\nMax Error:${errors[1]}, Min Error:${errors[0]}`
     }
 }
