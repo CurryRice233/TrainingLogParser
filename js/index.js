@@ -104,6 +104,9 @@ class LogParser {
             this.files[fileName] = new FileData(fileName, fileText);
             this.files[fileName].visible = true;
             addFileDiv(fileName, this.files[fileName])
+        }else{
+            this.files[fileName] = new FileData(fileName, fileText);
+            this.files[fileName].visible = true;
         }
         this.files[fileName].updateKeys(this.getInitParseKeys(fileName));
         this.updateChart();
