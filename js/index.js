@@ -97,6 +97,18 @@ class LogParser {
                 this.cookies[cookie[0].trim()] = cookie[1];
             }
         }
+
+        this.globalParseKey = this.cookies['globalParseKey'] || '';
+        this.maxGlobalParseKeyHistory = 10;
+        try {
+            this.globalParseKeys = JSON.parse(this.cookies['globalParseKeys'] || '[]');
+            if (!Array.isArray(this.globalParseKeys)) {
+                this.globalParseKeys = [];
+            }
+            this.globalParseKeys = this.globalParseKeys.slice(0, this.maxGlobalParseKeyHistory);
+        } catch (e) {
+            this.globalParseKeys = [];
+        }
     }
 
     addFile(fileName, fileText) {
@@ -135,10 +147,83 @@ class LogParser {
     }
 
     setGlobalLossTag(keys){
+        this.globalParseKey = keys;
         for(let key in this.files){
             this.files[key].updateKeys(keys)
         }
         this.updateChart();
+    }
+
+    addGlobalParseKeyHistory(keys){
+        this.globalParseKey = keys;
+        this.cookies['globalParseKey'] = keys;
+
+        if (keys === '' || this.isDefaultGlobalParseKey(keys)){
+            return;
+        }
+
+        this.globalParseKeys = this.globalParseKeys.filter(item => item !== keys);
+        this.globalParseKeys.unshift(keys);
+        if (this.globalParseKeys.length > this.maxGlobalParseKeyHistory){
+            this.globalParseKeys = this.globalParseKeys.slice(0, this.maxGlobalParseKeyHistory);
+        }
+
+        this.cookies['globalParseKeys'] = JSON.stringify(this.globalParseKeys);
+        this.updateGlobalParseKeyOptions();
+    }
+
+    isDefaultGlobalParseKey(keys){
+        let datalist = document.getElementById('globalParseKey');
+        if (!datalist){
+            return false;
+        }
+
+        let defaultOptions = datalist.querySelectorAll('option:not(.history-global-parse-key)');
+        for(let option of defaultOptions){
+            if (option.value === keys){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    migrateGlobalParseKeyHistory(){
+        this.globalParseKeys = this.globalParseKeys.filter(key => !this.isDefaultGlobalParseKey(key));
+        this.cookies['globalParseKeys'] = JSON.stringify(this.globalParseKeys);
+
+        if (this.globalParseKey === ''){
+            return;
+        }
+        if (this.globalParseKeys.indexOf(this.globalParseKey) !== -1){
+            return;
+        }
+        if (this.isDefaultGlobalParseKey(this.globalParseKey)){
+            return;
+        }
+
+        this.globalParseKeys.unshift(this.globalParseKey);
+        if (this.globalParseKeys.length > this.maxGlobalParseKeyHistory){
+            this.globalParseKeys = this.globalParseKeys.slice(0, this.maxGlobalParseKeyHistory);
+        }
+        this.cookies['globalParseKeys'] = JSON.stringify(this.globalParseKeys);
+    }
+
+    updateGlobalParseKeyOptions(){
+        let datalist = document.getElementById('globalParseKey');
+        if (!datalist){
+            return;
+        }
+
+        this.migrateGlobalParseKeyHistory();
+
+        datalist.querySelectorAll('option.history-global-parse-key').forEach(option => option.remove());
+        for(let key of this.globalParseKeys){
+            let option = document.createElement('option');
+            option.value = key;
+            option.textContent = key;
+            option.classList.add('history-global-parse-key');
+            datalist.appendChild(option);
+        }
     }
 
     setFileSetting(fileName, parseKeys, rangeTag, regex){

@@ -66,7 +66,7 @@
 
             <datalist id="globalParseKey">
                 <option name="Default" value='["loss:","norm:"]'>Default</option>
-                <option name="Megatron" value='["loss:","grad norm:"]'>Megatron</option>
+                <option name="Megatron" value='["loss:","grad norm:","(ms):"]'>Megatron</option>
                 <option name="Verl" value='["critic/rewards/mean:","actor/grad_norm:", "actor/kl_loss", "response_length/mean:"]'>Verl</option>
                 <option name="Trl" value='["&#x27;reward&#x27;:","&#x27;loss&#x27;:","&#x27;completions/mean_length&#x27;:","[&#x27;kl&#x27;:]"]'>Trl</option>
             </datalist>
@@ -147,8 +147,15 @@
         logParser.updateChart();
     });
 
+    document.getElementById("globalParseKeyText").value = logParser.globalParseKey || '';
+    logParser.updateGlobalParseKeyOptions();
     document.getElementById("globalParseKeyText").addEventListener("input", function() {
         logParser.setGlobalLossTag(this.value);
+    });
+
+    document.getElementById("globalParseKeyText").addEventListener("blur", function() {
+        logParser.addGlobalParseKeyHistory(this.value);
+        logParser.saveParseKeysToCookie();
     });
 
     document.getElementById('removeZeros').addEventListener('change', function () {
