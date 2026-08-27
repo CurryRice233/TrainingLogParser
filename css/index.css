@@ -312,3 +312,47 @@ input[type=checkbox]{
     text-wrap: nowrap;
     color: gray;
 }
+
+.tooltip-label {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip-label .tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    width: max-content;
+    max-width: 320px;
+    background-color: rgba(20, 20, 20, 0.95);
+    color: #f0f0f0;
+    text-align: left;
+    border: 1px solid gray;
+    border-radius: 6px;
+    padding: 6px 10px;
+    position: absolute;
+    z-index: 10;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    white-space: normal;
+    line-height: 1.4;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.tooltip-label:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip-label .tooltip-text::after {
+    content: " ";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -10px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+}
